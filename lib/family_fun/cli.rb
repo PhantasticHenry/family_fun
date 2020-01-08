@@ -3,6 +3,7 @@ class FamilyFun::CLI
     def call
         welcome
         menu
+
     end
 
     def welcome
@@ -110,30 +111,22 @@ class FamilyFun::CLI
         colorizer = Lolize::Colorizer.new
         prompt = TTY::Prompt.new(active_color: :cyan)
         @menu2 = [
-            {'Event date'=> -> do "\n#{FamilyFun::Event.find_date_by_index}\n" end},
-            {'Event location'=> -> do "\n#{FamilyFun::Event.find_location_by_index}\n" end},
-            {'Event URL'=> -> do "\n#{FamilyFun::Event.find_url_by_index}" end}
+            'Event details',
+            'Go back',
+            'Exit'
         ]
-        
-        case prompt.multi_select("Select for more info?", @menu2)
-        when 'Event date'
+       
+        case prompt.select("Select for event details.", @menu2)
+        when 'Event details'
             FamilyFun::Event.find_date_by_index
-        when 'Event location'
             FamilyFun::Event.find_location_by_index
-        when 'Event URL'
             FamilyFun::Event.find_url_by_index
+            event_info
         end
     end
 
     def event_info
-        prompt = TTY::Prompt.new(active_color: :cyan)
-        prompt.multi_select("Select event info?") do |menu|
-            menu.enum ')'
-          
-            menu.choice :date,   {score: 10}
-            menu.choice :location,    {score: 20}
-            menu.choice :url,    {score: 30}
-          end
+        FamilyFun::Scraper.scrape_details
     end
 
     def list_events
@@ -146,6 +139,7 @@ class FamilyFun::CLI
         FamilyFun::Event.find_name_by_index
         menu2
         menu
+
     end
 
     def free_events
@@ -155,29 +149,6 @@ class FamilyFun::CLI
     def editors_choice
         @editors_choice = FamilyFun::Scraper.editors
     end
-
-    # def find_name_by_index
-    #     colorizer = Lolize::Colorizer.new
-    #     puts ("For more event info. Please enter 1-#{FamilyFun::Event.all.length}: \n\n")
-    #     @name_input = gets.strip.to_i
-    #     colorizer.write("\nYou have selected: #{FamilyFun::Event.all[@name_input-1][:name]}\n\n")
-        
-    # end
-
-    # def find_date_by_index
-    #     colorizer = Lolize::Colorizer.new
-    #     colorizer.write("\nDate: #{FamilyFun::Event.all[@name_input-1][:date]}\n")
-    # end
-
-    # def find_location_by_index
-    #     colorizer = Lolize::Colorizer.new
-    #     colorizer.write("\nLocation: #{FamilyFun::Event.all[@name_input-1][:location]}\n")
-    # end
-
-    # def find_url_by_index
-    #     colorizer = Lolize::Colorizer.new
-    #     colorizer.write("\nURL: https://www.parentmap.com" + "#{FamilyFun::Event.all[@name_input-1][:url]}\n\n")
-    # end
 
     def goodbye
         system "clear"

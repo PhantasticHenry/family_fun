@@ -20,9 +20,16 @@ class FamilyFun::Scraper
                     :date=>event.css("h4.event-date").text.gsub(/\s+/, ""),
                     :location=>event.css("h5.event-location").text.gsub(/\s+/, ""),
                     :url=>event.css("a").attr("href").text.strip}
-
-        
         end
+    end
+
+    def self.scrape_details
+        colorizer = Lolize::Colorizer.new
+        website = Nokogiri::HTML(open("https://www.parentmap.com" + "#{FamilyFun::Event.all[FamilyFun::Event.details.join.to_i][:url]}"))
+        info = website.css("div.body p").text
+        colorizer.write("-------------------------------------------------------------\n #{info}\n-------------------------------------------------------------\n")
+        
+        
     end
 
     def self.free
