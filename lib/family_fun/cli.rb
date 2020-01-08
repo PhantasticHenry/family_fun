@@ -3,8 +3,6 @@ class FamilyFun::CLI
     def call
         welcome
         menu
-        list_events
-        goodbye
     end
 
     def welcome
@@ -37,13 +35,36 @@ class FamilyFun::CLI
         puts ''
 
         pid = fork{ exec 'afplay', "/Users/henryphan/Downloads/GoodDay_64kb.mp3" }
-        colorizer.write "What is your name?  "
-        sleep 0.5
-        input = gets.strip
-        colorizer.write " ------------------------------------------------------"
-        colorizer.write "| Hello #{input}! Are you ready for some family fun? 🥳   |"
+        prompt = TTY::Prompt.new(active_color: :cyan)
+            @list = [
+                {"Stop music" => -> do stop_music end},
+                {"Play music" => -> do play_music end},
+                {"Exit" => -> do goodbye end}
+            ]
+            case prompt.select("", @list)
+            when 'Stop music'
+                stop_music
+            when 'Play music'
+                play_music
+            when 'Exit'
+                goodbye
+            end
+
+        colorizer.write "\nWhat is your name?  "
+        sleep 1
+        @user_name = gets.strip
+        sleep 1
+        colorizer.write " \n------------------------------------------------------"
+        colorizer.write "| Hello #{@user_name}! Are you ready for some family fun? 🥳   |"
         colorizer.write " ------------------------------------------------------\n"
         sleep 0.5
+        if prompt.yes?("\nWould you like see the menu?\n".blue)
+        else goodbye
+    end
+
+    colorizer.write("\n-----------------------------------------------------------")
+    colorizer.write("|   Choose what you would like to do next?   |")
+    colorizer.write("----------------------------------------------------------")
     end
 
     def play_music
@@ -53,15 +74,14 @@ class FamilyFun::CLI
     def menu
         colorizer = Lolize::Colorizer.new
         prompt = TTY::Prompt.new(active_color: :cyan)
-        prompt.yes?('Would you like see the menu?'.blue)
-        colorizer.write('----------------------------------------------------------')
-        colorizer.write("|  Choose what you would like to do next?  |")
-        colorizer.write('----------------------------------------------------------')
-        while prompt.select("", @menu) != 'Exit'
+
+        # input = nil
+        # while input != 'Exit'
             @menu = [
                 {"All events" => -> do list_events end},
                 {"Free events" => -> do free_events end},
                 {"Editor's choice" => -> do editors_choice end},
+                {"More event info" => -> do event_info end},
                 {"Stop music" => -> do stop_music end},
                 {"Play music" => -> do play_music end},
                 {"Exit" => -> do goodbye end}
@@ -80,21 +100,84 @@ class FamilyFun::CLI
                 editors_choice
             when 'Free events'
                 free_events
+            when "More event info"
+                event_info
             end
+        # end
+    end
+
+    def menu2 
+        colorizer = Lolize::Colorizer.new
+        prompt = TTY::Prompt.new(active_color: :cyan)
+        @menu2 = [
+            {'Event date'=> -> do "\n#{FamilyFun::Event.find_date_by_index}\n" end},
+            {'Event location'=> -> do "\n#{FamilyFun::Event.find_location_by_index}\n" end},
+            {'Event URL'=> -> do "\n#{FamilyFun::Event.find_url_by_index}" end}
+        ]
+        
+        case prompt.multi_select("Select for more info?", @menu2)
+        when 'Event date'
+            FamilyFun::Event.find_date_by_index
+        when 'Event location'
+            FamilyFun::Event.find_location_by_index
+        when 'Event URL'
+            FamilyFun::Event.find_url_by_index
         end
     end
 
+    def event_info
+        prompt = TTY::Prompt.new(active_color: :cyan)
+        prompt.multi_select("Select event info?") do |menu|
+            menu.enum ')'
+          
+            menu.choice :date,   {score: 10}
+            menu.choice :location,    {score: 20}
+            menu.choice :url,    {score: 30}
+          end
+    end
+
     def list_events
-        @all_events = FamilyFun::Event.list_events
+        colorizer = Lolize::Colorizer.new
+        @events = FamilyFun::Scraper.scrape_events
+        prompt = TTY::Prompt.new(active_color: :cyan)
+        colorizer.write("\n-----------------------------------------------------")
+        puts ("\n\nInterested?\n\n")
+        colorizer.write("-----------------------------------------------------\n\n")
+        FamilyFun::Event.find_name_by_index
+        menu2
+        menu
     end
 
     def free_events
-        @all_events = FamilyFun::Event.free
+        @free_events = FamilyFun::Scraper.free
     end
 
     def editors_choice
-        @all_events = FamilyFun::Event.editors
+        @editors_choice = FamilyFun::Scraper.editors
     end
+
+    # def find_name_by_index
+    #     colorizer = Lolize::Colorizer.new
+    #     puts ("For more event info. Please enter 1-#{FamilyFun::Event.all.length}: \n\n")
+    #     @name_input = gets.strip.to_i
+    #     colorizer.write("\nYou have selected: #{FamilyFun::Event.all[@name_input-1][:name]}\n\n")
+        
+    # end
+
+    # def find_date_by_index
+    #     colorizer = Lolize::Colorizer.new
+    #     colorizer.write("\nDate: #{FamilyFun::Event.all[@name_input-1][:date]}\n")
+    # end
+
+    # def find_location_by_index
+    #     colorizer = Lolize::Colorizer.new
+    #     colorizer.write("\nLocation: #{FamilyFun::Event.all[@name_input-1][:location]}\n")
+    # end
+
+    # def find_url_by_index
+    #     colorizer = Lolize::Colorizer.new
+    #     colorizer.write("\nURL: https://www.parentmap.com" + "#{FamilyFun::Event.all[@name_input-1][:url]}\n\n")
+    # end
 
     def goodbye
         system "clear"
