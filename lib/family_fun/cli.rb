@@ -1,8 +1,14 @@
 class FamilyFun::CLI
+
+    @@user_name = []
     
     def call
         welcome
         menu
+    end
+
+    def self.user_name
+        @@user_name
     end
 
     def welcome
@@ -38,29 +44,16 @@ class FamilyFun::CLI
                     EOF
         puts ''
         puts ''
-
         pid = fork{ exec 'afplay', "/Users/henryphan/Downloads/GoodDay_64kb.mp3" }
+        sleep 1.2
+        pid = fork{ exec "killall afplay" }
         prompt = TTY::Prompt.new(active_color: :cyan)
-            @list = [
-                {"Stop music" => -> do stop_music end},
-                {"Play music" => -> do play_music end},
-                {"Exit" => -> do goodbye end}
-            ]
-            case prompt.select("", @list)
-            when 'Stop music'
-                stop_music
-            when 'Play music'
-                play_music
-            when 'Exit'
-                goodbye
-            end
-
         colorizer.write("\nWhat is your name?  ")
         sleep 1
-        @user_name = gets.strip
+        @@user_name << user_name = gets.strip
         sleep 1
         colorizer.write " \n------------------------------------------------------"
-        colorizer.write "| Hello #{@user_name}! Are you ready for some family fun? 🥳   |"
+        colorizer.write "| Hello #{user_name}! Are you ready for some family fun? 🥳   |"
         colorizer.write " ------------------------------------------------------\n"
         sleep 0.5
         if prompt.yes?("\nWould you like see the menu?\n".blue)
@@ -85,19 +78,12 @@ class FamilyFun::CLI
                 {"All events" => -> do list_events end},
                 {"Free events" => -> do free_events end},
                 {"Editor's choice" => -> do editors_choice end},
-                {"Filter by region" => -> do region end},
-                {"Stop music" => -> do stop_music end},
-                {"Play music" => -> do play_music end},
                 {"Exit" => -> do goodbye end}
             ]
      
             case prompt.select("", @menu)
             when 'All events'
                 list_events
-            when 'Stop music'
-                stop_music
-            when 'Play music'
-                play_music
             when 'Exit'
                 goodbye
             when "Editor's choice"
@@ -137,6 +123,7 @@ class FamilyFun::CLI
         colorizer = Lolize::Colorizer.new
         colorizer.write <<-DOC
 
+
         
             *    *
             *         '       *       .  *   '     .           * *
@@ -144,14 +131,14 @@ class FamilyFun::CLI
                 *                *'          *          *        '
             .           *               |               /
                         '.         |    |      '       |   '     *
-                        \*        \   \             /
+                        \\*        \\   \\             /
                 '          \     '* |    |  *        |*                *  *
-                    *      `.       \   |     *     /    *      '
-        .                  \      |   \          /               *
-            *'  *     '      \      \   '.       |
+                    *      `.       \\   |     *     /    *      '
+        .                  \\      |   \\          /               *
+            *'  *     '      \\      \\   '.       |
                 -._            `                  /         *
         ' '      ``._   *                           '          .      '
-            *           *\*          * .   .      *
+            *           *\\*          * .   .      *
         *  '        *    `-._                       .         _..:='        *
                     .  '      *       *    *   .       _.:--'
                 *           .     .     *         .-'         *
@@ -169,7 +156,9 @@ class FamilyFun::CLI
 
 
             DOC
-            colorizer.write ("\t\tExcellent choice!\n\n")
+            sleep 1
+            colorizer.write ("\tExcellent choice #{FamilyFun::CLI.user_name[0]}!\n\n")
+            sleep 1
     end
 
     def list_events

@@ -13,7 +13,7 @@ class FamilyFun::Scraper
             event_object.date = event.css("h4.event-date").text.gsub(/\s+/, " ")
             event_object.location = event.css("h5.event-location").text.gsub(/\s+/, "")
             event_object.url = event.css("a").attr("href").text.strip
-            colorizer.write("#{i}. #{event_object.name} - |#{event_object.date}|\n")
+            colorizer.write("\n#{i}. #{event_object.name} - |#{event_object.date}|\n")
             
                     FamilyFun::Event.all << event_hash = {
                     :name=>event.css("h3.event-title").text.strip,
@@ -44,7 +44,7 @@ class FamilyFun::Scraper
             event_object.date = event.css("h4.event-date").text.gsub(/\s+/, "")
             event_object.location = event.css("h5.event-location").text.gsub(/\s+/, "")
             event_object.url = event.css("a").attr("href").text.strip
-            colorizer.write("#{i}. #{event_object.name}\n")
+            colorizer.write("\n#{i}. #{event_object.name}\n")
 
                 FamilyFun::Event.all << event_hash = {
                 :name=>event.css("h3.event-title").text.strip,
@@ -67,34 +67,11 @@ class FamilyFun::Scraper
             event_object.date = event.css("h4.event-date").text.gsub(/\s+/, "")
             event_object.location = event.css("h5.event-location").text.gsub(/\s+/, "")
             event_object.url = event.css("a").attr("href").text.strip
-            colorizer.write("#{i}. #{event_object.name}\n")
+            colorizer.write("\n#{i}. #{event_object.name}\n")
 
                 FamilyFun::Event.all << event_hash = {
                 :name=>event.css("h3.event-title").text.strip,
                 :date=>event.css("h4.event-date").text.gsub(/\s+/, " "),
-                :location=>event.css("h5.event-location").text.gsub(/\s+/, ""),
-                :url=>event.css("a").attr("href").text.strip}
-        end
-    end
-
-    def self.scrape_seattle
-        
-        colorizer = Lolize::Colorizer.new
-        system "clear"
-        website = Nokogiri::HTML(open("https://www.parentmap.com/calendar?geolocation-lat=&geolocation-lng=&geolocation_geocoder_google_geocoding_api_state=1&date=now&keys=&geolocation_geocoder_google_geocoding_api=&region%5B603%5D=603&geolocation=5"))
-        events = website.css("div.col-content")
-        
-        events.each.with_index(1) do |event, i|
-            event_object = FamilyFun::Event.new
-            event_object.name = event.css("h3.event-title").text.strip
-            event_object.date = event.css("h4.event-date").text.gsub(/\s+/, " ")
-            event_object.location = event.css("h5.event-location").text.gsub(/\s+/, "")
-            event_object.url = event.css("a").attr("href").text.strip
-            colorizer.write("#{i}. #{event_object.name}\n")
-
-                FamilyFun::Event.all << event_hash = {
-                :name=>event.css("h3.event-title").text.strip,
-                :date=>event.css("h4.event-date").text.gsub(/\s+/, ""),
                 :location=>event.css("h5.event-location").text.gsub(/\s+/, ""),
                 :url=>event.css("a").attr("href").text.strip}
         end

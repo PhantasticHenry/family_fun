@@ -5,10 +5,6 @@ class FamilyFun::Event
     @@all = []
     @@details = []
 
-    def initialize
-        # save
-    end
-
     def save 
         self.class.all << self
     end
@@ -44,6 +40,7 @@ class FamilyFun::Event
         end
         FamilyFun::CLI.congrats
         colorizer.write("You have selected: #{self.all[@name_input][:name]}\n\n")
+        sleep 1
     end
 
     def self.find_date_by_index
