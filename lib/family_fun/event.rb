@@ -1,6 +1,6 @@
 class FamilyFun::Event
 
-    attr_accessor :name, :date, :location, :url, :price, :age
+    attr_accessor :name, :date, :location, :url
 
     @@all = []
     @@details = []
@@ -24,15 +24,26 @@ class FamilyFun::Event
     def self.destroy
         self.all.clear
     end
+    
+    def self.destroy_details
+        self.details.clear
+    end
 
     def self.find_name_by_index
         colorizer = Lolize::Colorizer.new
-        puts ("For more event info. Please enter 1-#{self.all.length}: \n\n")
-        @name_input = gets.strip.to_i-1
-        @@details << @name_input
-        colorizer.write("\nYou have selected: #{self.all[@name_input][:name]}\n\n")
-
-        
+        prompt = TTY::Prompt.new(active_color: :cyan)
+        puts ("Please enter 1-#{self.all.length}: \n\n")
+        valid = nil
+        while !valid
+            @name_input = gets.strip.to_i-1
+            valid = if (@name_input >= 0) && (@name_input <= FamilyFun::Event.all.length)
+                system "clear"
+                @@details << @name_input
+            else puts "Invalid entry. Please enter 1-#{self.all.length}: ".red.bold
+            end
+        end
+        FamilyFun::CLI.congrats
+        colorizer.write("You have selected: #{self.all[@name_input][:name]}\n\n")
     end
 
     def self.find_date_by_index
