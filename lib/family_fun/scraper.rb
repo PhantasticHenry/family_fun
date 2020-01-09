@@ -10,14 +10,14 @@ class FamilyFun::Scraper
             prompt = TTY::Prompt.new(active_color: :cyan)
             event_object = FamilyFun::Event.new
             event_object.name = event.css("h3.event-title").text.strip
-            event_object.date = event.css("h4.event-date").text.gsub(/\s+/, "")
+            event_object.date = event.css("h4.event-date").text.gsub(/\s+/, " ")
             event_object.location = event.css("h5.event-location").text.gsub(/\s+/, "")
             event_object.url = event.css("a").attr("href").text.strip
-            colorizer.write("#{i}. #{event_object.name}\n")
+            colorizer.write("#{i}. #{event_object.name} - |#{event_object.date}|\n")
             
                     FamilyFun::Event.all << event_hash = {
                     :name=>event.css("h3.event-title").text.strip,
-                    :date=>event.css("h4.event-date").text.gsub(/\s+/, ""),
+                    :date=>event.css("h4.event-date").text.gsub(/\s+/, " "),
                     :location=>event.css("h5.event-location").text.gsub(/\s+/, ""),
                     :url=>event.css("a").attr("href").text.strip}
         end
@@ -27,9 +27,8 @@ class FamilyFun::Scraper
         colorizer = Lolize::Colorizer.new
         website = Nokogiri::HTML(open("https://www.parentmap.com" + "#{FamilyFun::Event.all[FamilyFun::Event.details.join.to_i][:url]}"))
         info = website.css("div.body p").text
-        colorizer.write("-------------------------------------------------------------\n #{info}\n-------------------------------------------------------------\n")
-        
-        
+        colorizer.write("-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n #{info}\n-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n")
+        FamilyFun::Event.destroy_details
     end
 
     def self.free
@@ -45,7 +44,13 @@ class FamilyFun::Scraper
             event_object.date = event.css("h4.event-date").text.gsub(/\s+/, "")
             event_object.location = event.css("h5.event-location").text.gsub(/\s+/, "")
             event_object.url = event.css("a").attr("href").text.strip
-            puts "#{i}. #{event_object.name}"
+            colorizer.write("#{i}. #{event_object.name}\n")
+
+                FamilyFun::Event.all << event_hash = {
+                :name=>event.css("h3.event-title").text.strip,
+                :date=>event.css("h4.event-date").text.gsub(/\s+/, " "),
+                :location=>event.css("h5.event-location").text.gsub(/\s+/, ""),
+                :url=>event.css("a").attr("href").text.strip}
         end
     end
 
@@ -62,7 +67,36 @@ class FamilyFun::Scraper
             event_object.date = event.css("h4.event-date").text.gsub(/\s+/, "")
             event_object.location = event.css("h5.event-location").text.gsub(/\s+/, "")
             event_object.url = event.css("a").attr("href").text.strip
-            puts "#{i}. #{event_object.name}"
+            colorizer.write("#{i}. #{event_object.name}\n")
+
+                FamilyFun::Event.all << event_hash = {
+                :name=>event.css("h3.event-title").text.strip,
+                :date=>event.css("h4.event-date").text.gsub(/\s+/, " "),
+                :location=>event.css("h5.event-location").text.gsub(/\s+/, ""),
+                :url=>event.css("a").attr("href").text.strip}
+        end
+    end
+
+    def self.scrape_seattle
+        
+        colorizer = Lolize::Colorizer.new
+        system "clear"
+        website = Nokogiri::HTML(open("https://www.parentmap.com/calendar?geolocation-lat=&geolocation-lng=&geolocation_geocoder_google_geocoding_api_state=1&date=now&keys=&geolocation_geocoder_google_geocoding_api=&region%5B603%5D=603&geolocation=5"))
+        events = website.css("div.col-content")
+        
+        events.each.with_index(1) do |event, i|
+            event_object = FamilyFun::Event.new
+            event_object.name = event.css("h3.event-title").text.strip
+            event_object.date = event.css("h4.event-date").text.gsub(/\s+/, " ")
+            event_object.location = event.css("h5.event-location").text.gsub(/\s+/, "")
+            event_object.url = event.css("a").attr("href").text.strip
+            colorizer.write("#{i}. #{event_object.name}\n")
+
+                FamilyFun::Event.all << event_hash = {
+                :name=>event.css("h3.event-title").text.strip,
+                :date=>event.css("h4.event-date").text.gsub(/\s+/, ""),
+                :location=>event.css("h5.event-location").text.gsub(/\s+/, ""),
+                :url=>event.css("a").attr("href").text.strip}
         end
     end
 
