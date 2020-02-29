@@ -24,7 +24,7 @@ GEM
     pry (0.12.2)
       coderay (~> 1.1.0)
       method_source (~> 0.9.0)
-    rake (12.3.2)
+    rake (12.3.3)
     rspec (3.9.0)
       rspec-core (~> 3.9.0)
       rspec-expectations (~> 3.9.0)
@@ -58,7 +58,7 @@ DEPENDENCIES
   family_fun!
   lolize
   pry
-  rake (~> 12.0)
+  rake (~> 12.3)
   rspec (~> 3.0)
   tty-prompt
 
