@@ -1,14 +1,8 @@
 class FamilyFun::CLI
-
-    @@user_name = []
-    
     def call
+        FamilyFun::Scraper.scrape_events
         welcome
         menu
-    end
-
-    def self.user_name
-        @@user_name
     end
 
     def welcome
@@ -42,84 +36,97 @@ class FamilyFun::CLI
 
 
                     EOF
-        puts ''
-        puts ''
-        pid = fork{ exec 'afplay', "/Users/henryphan/Downloads/GoodDay_64kb.mp3" }
-        sleep 1.2
-        pid = fork{ exec "killall afplay" }
+        puts "\n\n"
         prompt = TTY::Prompt.new(active_color: :cyan)
         colorizer.write("\nWhat is your name?  ")
         sleep 1
-        @@user_name << user_name = gets.strip
+        @user_name = gets.strip
         sleep 1
-        colorizer.write " \n------------------------------------------------------"
-        colorizer.write "| Hello #{user_name}! Are you ready for some family fun? 🥳   |"
-        colorizer.write " ------------------------------------------------------\n"
+
+        colorizer.write "\n\n Hello #{@user_name}! Are you ready for some family fun? 🥳   \n\n"
+        colorizer.write("-"*70)
+        puts ""
+        colorizer.write("-"*70)
         sleep 0.5
-        if prompt.yes?("\nWould you like see the menu?\n".blue)
+        if prompt.yes?("\n\nWould you like see the menu?\n\n".blue)
         else goodbye
-    end
-
-    colorizer.write("\n-----------------------------------------------------------")
-    colorizer.write("|   Choose what you would like to do next?   |")
-    colorizer.write("----------------------------------------------------------")
-    end
-
-    def play_music
-        pid = fork{ exec 'afplay', "/Users/henryphan/Downloads/GoodDay_64kb.mp3" }
-        menu
+        end
+        colorizer.write("-"*70)
+        puts ""
+        colorizer.write("-"*70)
+        colorizer.write("\n\n      What you would like to do next?      \n\n")
+        colorizer.write("-"*70)
+        puts ""
+        colorizer.write("-"*70)
     end
 
     def menu
         colorizer = Lolize::Colorizer.new
         prompt = TTY::Prompt.new(active_color: :cyan)
 
-            @menu = [
-                {"All events" => -> do list_events end},
+            menu = [
+                {"All events" => -> do list_all_events end},
                 {"Free events" => -> do free_events end},
-                {"Editor's choice" => -> do editors_choice end},
                 {"Exit" => -> do goodbye end}
             ]
      
-            case prompt.select("", @menu)
-            when 'All events'
-                list_events
-            when 'Exit'
-                goodbye
-            when "Editor's choice"
-                editors_choice
-            when 'Free events'
-                free_events
-            end
+            prompt.select("", menu)
     end
 
-    def menu2 
-        colorizer = Lolize::Colorizer.new
-        prompt = TTY::Prompt.new(active_color: :cyan)
-        @menu2 = [
-            'Event details',
-            'Go back',
-            'Exit'
-        ]
-       
-        case prompt.select("Select from list of options.", @menu2)
-        when 'Event details'
-            FamilyFun::Event.find_date_by_index
-            FamilyFun::Event.find_location_by_index
-            FamilyFun::Event.find_url_by_index
-            event_info
-        when 'Go back'
-            menu
-        when 'Exit'
-            goodbye
+    def event_details(details)
+        FamilyFun::Event.all.detect do |e| 
+            e.details == details
         end
     end
 
-    def event_info
-        FamilyFun::Scraper.scrape_details
+    def display(event)
+        colorizer = Lolize::Colorizer.new
+        congrats
+        if event.price == nil 
+            colorizer.write("\n\nDetails:\n\n#{event.details}\n\nPrice: Free!#{event.price}\n\nDate: #{event.date}\n\nLocation: #{event.location}\n\nAddress: #{event.address}\n\nURL: #{event.url}\n\n")
+        else
+            colorizer.write("\n\nDetails:\n\n#{event.details}\n\nPrice: #{event.price}\n\nDate: #{event.date}\n\nLocation: #{event.location}\n\nAddress: #{event.address}\n\nURL: #{event.url}\n\n")
+        end
+    end
+    def list_all_events
+        system "clear"
+        colorizer = Lolize::Colorizer.new
+        prompt = TTY::Prompt.new(active_color: :cyan)
+        events = []
+        colorizer.write("\n\n"+("-"*75)+"\n\n")
+        colorizer.write("All Events")
+        FamilyFun::Event.all.each do |event|
+            events << {event.name => -> do display(event) end}
+        end
+        colorizer.write("\n\n"+("-"*75)+"\n\n")
+        prompt.select("Choose an event", events, per_page: FamilyFun::Event.all.count)
+        menu2
     end
 
-    def self.congrats
+    def free_events
+        system "clear"
+        colorizer = Lolize::Colorizer.new
+        free = []
+        FamilyFun::Event.all.each do |e|
+            if e.price == nil
+                free << e
+            end
+        end
+        
+        prompt = TTY::Prompt.new(active_color: :cyan)
+        colorizer = Lolize::Colorizer.new
+        events = []
+        colorizer.write("\n\n"+("-"*75)+"\n\n")
+        colorizer.write("Free Events")
+        FamilyFun::Event.all.each do |event| 
+            events << {event.name => -> do display(event) end}
+        end
+        colorizer.write("\n\n"+("-"*75)+"\n\n")
+        prompt.select("Choose an event", events, per_page: free.count)
+        menu2
+    end
+
+    def congrats
         colorizer = Lolize::Colorizer.new
         colorizer.write <<-DOC
 
@@ -157,49 +164,29 @@ class FamilyFun::CLI
 
             DOC
             sleep 1
-            colorizer.write ("\tExcellent choice #{FamilyFun::CLI.user_name[0]}!\n\n")
+            colorizer.write ("\tExcellent choice #{@user_name}!\n\n")
             sleep 1
     end
 
-    def list_events
-        colorizer = Lolize::Colorizer.new
-        @events = FamilyFun::Scraper.scrape_events
+    def menu2
         prompt = TTY::Prompt.new(active_color: :cyan)
-        colorizer.write("\n-----------------------------------------------------")
-        puts ("\n\nInterested?\n\n")
-        colorizer.write("-----------------------------------------------------\n\n")
-        FamilyFun::Event.find_name_by_index
-        menu2
-        menu
-    end
-
-    def free_events
-        colorizer = Lolize::Colorizer.new
-        @free_events = FamilyFun::Scraper.free
-        colorizer.write("\n-----------------------------------------------------")
-        puts ("\n\nInterested?\n\n")
-        colorizer.write("-----------------------------------------------------\n\n")
-        FamilyFun::Event.find_name_by_index
-        menu2
-        menu
-    end
-
-    def editors_choice
-        colorizer = Lolize::Colorizer.new
-        @editors_choice = FamilyFun::Scraper.editors
-        colorizer.write("\n-----------------------------------------------------")
-        puts ("\n\nInterested?\n\n")
-        colorizer.write("-----------------------------------------------------\n\n")
-        FamilyFun::Event.find_name_by_index
-        menu2
-        menu
+        puts "\n"
+        menu2 = [
+            'Back to menu',
+            'Exit'
+        ]
+       
+        case prompt.select("Select from list of options.", menu2)
+        when 'Back to menu'
+            menu
+        when 'Exit'
+            goodbye
+        end
     end
 
     def goodbye
         system "clear"
         colorizer = Lolize::Colorizer.new
-        pid = fork{ exec "killall afplay" }
-        sleep 0.5
         colorizer.write <<-DOC
 
         ooooo   ooooo                                                                                          .o8             .o8                        .o. 
@@ -212,14 +199,6 @@ class FamilyFun::CLI
                                                                           d"     YD                                                           .o..P'          
                                                                           "Y88888P'                                                           `Y8P'
         DOC
-        pid = fork{ exec 'afplay', "/Users/henryphan/Downloads/GoodDay_64kb.mp3" }
-        sleep 5
-        pid = fork{ exec "killall afplay" }
         exit
     end
-
-    def stop_music
-        pid = fork{ exec "killall afplay" }
-    end
-
 end
