@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require "bundler/setup"
-# require "family_fun"
+require "family_fun"
 
 
 # You can add fixtures and/or initialization code here to make experimenting
