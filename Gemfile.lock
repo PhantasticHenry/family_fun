@@ -19,18 +19,6 @@ GEM
     paint (0.8.7)
     pastel (0.8.0)
       tty-color (~> 0.5)
-    pry (0.14.1)
-      coderay (~> 1.1)
-      method_source (~> 1.0)
-    racc (1.5.2)
-    rake (12.3.3)
-    rspec (3.10.0)
-      rspec-core (~> 3.10.0)
-      rspec-expectations (~> 3.10.0)
-      rspec-mocks (~> 3.10.0)
-    rspec-core (3.10.1)
-      rspec-support (~> 3.10.0)
-    rspec-expectations (3.10.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.10.0)
     rspec-mocks (3.10.2)
@@ -56,7 +44,7 @@ DEPENDENCIES
   family_fun!
   lolize
   pry
-  rake (~> 12.0)
+  rake (~> 12.3)
   rspec (~> 3.0)
   tty-prompt
 
