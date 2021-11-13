@@ -3,8 +3,8 @@ require_relative 'lib/family_fun/version'
 Gem::Specification.new do |spec|
   spec.name          = "family_fun"
   spec.version       = FamilyFun::VERSION
-  spec.authors       = ["<PhantasticHenry>"]
-  spec.email         = ["<h.phan06@gmail.com>"]
+  spec.authors       = ["PhantasticHenry"]
+  spec.email         = ["h.phan06@gmail.com"]
 
   spec.summary       = %q{Family fun events}
   spec.homepage      = "https://github.com/PhantasticHenry/family_fun.git"
